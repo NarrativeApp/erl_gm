@@ -32,7 +32,7 @@
 identify_explicit(File, Options) ->
   Template = "identify -format :format_string :file",
   TemplateOpts = [{file, File}, {format_string, identify_format_string(Options)}],
-  Result = os:cmd("gm " ++ bind_data(Template, TemplateOpts, [escape])),
+  Result = os:cmd("magick " ++ bind_data(Template, TemplateOpts, [escape])),
   case cmd_error(Result) of
     {error, Msg}  -> {error, Msg};
     no_error      -> parse_identify_explicit(Result)
@@ -58,7 +58,7 @@ convert(File, Converted, Options) ->
   convert(File, Converted, Options, []).
 
 convert(File, Converted, Options, OutputOptions) ->
-  Template = "convert {{options}} :input_file {{output_options}} :output_file",
+  Template = ":input_file {{options}} {{output_options}} :output_file",
   TemplateOpts = [{input_file, File}, {output_file, Converted}],
   exec_cmd(Template, TemplateOpts, Options, OutputOptions).
 
@@ -85,7 +85,7 @@ version() ->
 
 %% Run an os:cmd based on a template without options
 exec_cmd(Template) ->
-  os:cmd(lists:concat(["gm ", Template])).
+  os:cmd(lists:concat(["magick ", Template])).
 
 %% Run an os:cmd based on a template and passed in options
 exec_cmd(Template, ExtraOptions, Options) ->
@@ -97,7 +97,7 @@ exec_cmd(Template, ExtraOptions, Options, OutputOptions) ->
   PreParsed = bind_data(Template, ExtraOptions, [escape]),
   CmdString = re:replace(PreParsed, "{{options}}", OptString, [{return, list}]),
   Command = re:replace(CmdString, "{{output_options}}", OutOptString, [{return, list}]),
-  Cmd = os:cmd(lists:concat(["gm ", Command])),
+  Cmd = os:cmd(lists:concat(["magick ", Command])),
   parse_result(Cmd).
 
 %% Create a format string from the passed in options
